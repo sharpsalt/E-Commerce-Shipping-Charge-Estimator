@@ -28,7 +28,7 @@ A production-grade **B2B e-commerce marketplace API** for calculating shipping c
 ### 1. Clone & Install
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/sharpsalt/E-Commerce-Shipping-Charge-Estimator.git
 cd E-Commerce_Shipping_Charge_Estimator
 npm install
 ```
