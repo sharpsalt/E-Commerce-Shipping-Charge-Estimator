@@ -1,0 +1,128 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String   @unique
+  email       String?
+  addressLine String?
+  city        String?
+  state       String?
+  pincode     String?
+  lat         Float
+  lng         Float
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([lat, lng])
+  @@map("customers")
+}
+
+model Seller {
+  id          String    @id @default(cuid())
+  name        String
+  phone       String    @unique
+  email       String?
+  addressLine String?
+  city        String?
+  state       String?
+  pincode     String?
+  lat         Float
+  lng         Float
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+
+  @@index([lat, lng])
+  @@map("sellers")
+}
+
+model Product {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  sellingPriceINR Float    @map("selling_price_inr")
+  weightKg        Float    @map("weight_kg")
+  lengthCm        Float    @map("length_cm")
+  widthCm         Float    @map("width_cm")
+  heightCm        Float    @map("height_cm")
+  category        String?
+  sku             String?  @unique
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  sellerId String @map("seller_id")
+  seller   Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+
+  @@index([sellerId])
+  @@map("products")
+}
+
+model Warehouse {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  addressLine   String?
+  city          String?
+  state         String?
+  pincode       String?
+  lat           Float
+  lng           Float
+  capacityKg    Float?   @map("capacity_kg")
+  isOperational Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([lat, lng])
+  @@map("warehouses")
+}
+
+model ShippingRate {
+  id              String         @id @default(cuid())
+  transportMode   TransportMode
+  minDistanceKm   Float          @map("min_distance_km")
+  maxDistanceKm   Float?         @map("max_distance_km") // null = unlimited
+  ratePerKmPerKg  Float          @map("rate_per_km_per_kg")
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@unique([transportMode])
+  @@map("shipping_rates")
+}
+
+
+model DeliverySpeedConfig {
+  id                    String        @id @default(cuid())
+  speed                 DeliverySpeed
+  baseCourierChargeINR  Float         @map("base_courier_charge_inr")
+  extraChargePerKg      Float         @default(0) @map("extra_charge_per_kg")
+  isActive              Boolean       @default(true)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@unique([speed])
+  @@map("delivery_speed_configs")
+}
+
+
+enum TransportMode {
+  AEROPLANE
+  TRUCK
+  MINI_VAN
+}
+
+enum DeliverySpeed {
+  STANDARD
+  EXPRESS
+}
